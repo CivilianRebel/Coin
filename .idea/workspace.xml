@@ -37,8 +37,8 @@
       <file pinned="false" current-in-tab="true">
         <entry file="file://$PROJECT_DIR$/network.py">
           <provider selected="true" editor-type-id="text-editor">
-            <state relative-caret-position="554">
-              <caret line="122" column="46" lean-forward="true" selection-start-line="122" selection-start-column="46" selection-end-line="122" selection-end-column="46" />
+            <state relative-caret-position="316">
+              <caret line="108" column="74" lean-forward="true" selection-start-line="108" selection-start-column="74" selection-end-line="108" selection-end-column="74" />
               <folding>
                 <element signature="e#0#16#0" expanded="true" />
                 <element signature="e#1017#1060#0" />
@@ -112,6 +112,9 @@
       <find>glob</find>
     </findStrings>
   </component>
+  <component name="Git.Settings">
+    <option name="RECENT_GIT_ROOT_PATH" value="$PROJECT_DIR$" />
+  </component>
   <component name="IdeDocumentHistory">
     <option name="CHANGED_PATHS">
       <list>
@@ -133,6 +136,7 @@
     <option name="width" value="1936" />
     <option name="height" value="1056" />
   </component>
+  <component name="ProjectLevelVcsManager" settingsEditedManually="true" />
   <component name="ProjectView">
     <navigator proportions="" version="1">
       <foldersAlwaysOnTop value="true" />
@@ -153,6 +157,7 @@
     </panes>
   </component>
   <component name="PropertiesComponent">
+    <property name="SHARE_PROJECT_CONFIGURATION_FILES" value="true" />
     <property name="settings.editor.selected.configurable" value="editing.templates" />
   </component>
   <component name="RunDashboard">
@@ -386,8 +391,8 @@
     </entry>
     <entry file="file://$PROJECT_DIR$/network.py">
       <provider selected="true" editor-type-id="text-editor">
-        <state relative-caret-position="554">
-          <caret line="122" column="46" lean-forward="true" selection-start-line="122" selection-start-column="46" selection-end-line="122" selection-end-column="46" />
+        <state relative-caret-position="316">
+          <caret line="108" column="74" lean-forward="true" selection-start-line="108" selection-start-column="74" selection-end-line="108" selection-end-column="74" />
           <folding>
             <element signature="e#0#16#0" expanded="true" />
             <element signature="e#1017#1060#0" />

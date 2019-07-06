@@ -6,10 +6,11 @@ convention '{location}/blockchain/{key}.value'
 containing the value
 """
 
+import glob
 import json
 import os
-import glob
 import time
+
 # imports from local package
 from block import Block
 from transaction import Transaction
@@ -137,7 +138,6 @@ class Blockchain:
         return self.chain[-1]
 
     def add_transaction(self, transaction: Transaction):
-<<<<<<< HEAD
         """
         Adds a signed transaction to transactions waiting to be added to block
         :param transaction: Transaction-like object

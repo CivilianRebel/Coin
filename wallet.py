@@ -1,11 +1,12 @@
 """
 this file contains the wallet handler
 """
-import os
-import Crypto.Random
-from Crypto.PublicKey import RSA
 import binascii
 import json
+import os
+
+import Crypto.Random
+from Crypto.PublicKey import RSA
 
 
 class Wallet:
@@ -31,6 +32,7 @@ class Wallet:
         else:
             with open(self.save_location, 'r') as file:
                 self.wallet = json.load(file)
+        return self
 
     def create(self):
         # TODO: add check to see if folder exists
@@ -40,3 +42,4 @@ class Wallet:
             self.wallet = self.generate_new()
             with open(self.save_location, 'w+') as file:
                 json.dump(self.wallet, file)
+        return self

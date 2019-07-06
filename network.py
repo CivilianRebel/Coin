@@ -47,7 +47,7 @@ class Peer:
         if self.debugging:
             _debug(args)
 
-    def create_server_socket(self, port=0, q=5):
+    def create_server_socket(self, port=None, q=5):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         sock.bind(('0.0.0.0', port if port else self.listen_port))
@@ -142,11 +142,15 @@ class Peer:
 # noinspection PyBroadException
 class PeerConnection:
 
-    def __init__(self, name, host, port, sock, debug):
+    def __init__(self, name, host, port, sock=None, debug=True):
         self.name = name
         self.host = host
         self.port = port
-        self.sock = sock
+        if sock is not None:
+            self.sock = sock
+        else:
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.connect((host, port))
         self.debugging = debug
 
     def close(self):

@@ -1,8 +1,9 @@
-import json, time
-from Crypto.Signature import PKCS1_v1_5 as pkcs15
-from Crypto.PublicKey import RSA
-from Crypto.Hash import SHA256
 import binascii
+import json
+
+from Crypto.Hash import SHA256
+from Crypto.PublicKey import RSA
+from Crypto.Signature import PKCS1_v1_5 as pkcs15
 
 
 class Transaction:
@@ -45,6 +46,10 @@ class Transaction:
 
     @property
     def verified(self):
+        """
+        Returns boolean of if the transaction is A) signed AND B) The signature matches
+        :return:
+        """
         if self.signature is None:
             return False
         pubkey = RSA.importKey(binascii.unhexlify(self.sender_public))

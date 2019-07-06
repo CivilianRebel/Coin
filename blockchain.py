@@ -138,6 +138,8 @@ class Blockchain:
         return self.chain[-1]
 
     def add_transaction(self, transaction: Transaction):
+        # TODO: add handling for transaction verification and adding to list
+        pass
 
     def add_block_to_chain(self, block: Block):
         # verify signature

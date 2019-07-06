@@ -5,6 +5,9 @@ for now this is just a CLI
 """
 import time
 from uuid import uuid4
+from threading import Thread
+from queue import Queue
+
 
 from blockchain import Blockchain
 from network import Peer
@@ -18,6 +21,8 @@ class Main:
         self.running = True
         self.blockchain = Blockchain()
         self.wallet = None
+        self.peer_messenger = Queue()
+        self.network_thread = None
         self.id = str(uuid4()).replace('-', '')
         self.network = Peer(self.id, '127.0.0.1', 25565)
         self.handlers = {'load': self.load_wallet,

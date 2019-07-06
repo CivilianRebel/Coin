@@ -3,11 +3,11 @@ Created by Steven ODonnell on 6/30/2019
 This class implements the gui for the application
 for now this is just a CLI
 """
-import os
+from uuid import uuid4
+
 from blockchain import Blockchain
 from network import Peer
 from wallet import Wallet
-from uuid import uuid4
 
 
 class Main:
@@ -36,7 +36,7 @@ class Main:
             print('[1]\t\t Load wallet')
             print('[2]\t\t Create wallet')
             choice = input('Pick Number: ')
-            os.system('cls')
+            # os.system('cls')
             print(f'You chose {choice}')
             self.handlers[choice]()
 

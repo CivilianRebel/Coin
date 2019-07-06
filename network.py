@@ -1,3 +1,4 @@
+import json
 import threading
 import traceback
 import struct
@@ -11,6 +12,7 @@ version = 'vers'
 verrack = 'vack'
 getpeers = 'getpeers'
 addr = 'addr'
+inv = 'inv'
 
 packets = [version, verrack, getpeers]
 """
@@ -104,24 +106,37 @@ class Peer:
         pass
 
     def handle_get_peers(self, peer_connection, data):
+        """
+
+        :param peer_connection: Connection to the peer for writing and/or reading
+        :param data: In this method this should be the number of peers to reply with
+        :return: None
+        """
         self.lock.acquire()
         try:
             self.debug(f'Sending list of peers to {peer_connection.host}')
-            msg = ''
+            msg = {}
             for peer in self.peers:
                 host, port, pid = peer['host'], peer['port'], peer['id']
-                if len(msg.split(',')) >= int(data):
-                    if msg[-1] == ',':
-                        msg = msg[:-1]
-                    break
-                msg += f'{pid};{host}:{port},'
-            peer_connection.send(addr, msg)
+                m_dict = {'host': host,
+                          'port': port}
+                msg[pid] = m_dict
+            peer_connection.send(addr, json.dumps(msg))
         finally:
             self.lock.release()
 
     def handle_addr(self, peer_connection, data):
         # TODO: handle list of hosts from peer
-        pass
+        with self.lock:
+            if len(self.peers) >= self.max_peers:
+                return None
+            data_dict = json.loads(data)
+            for pid, entry in data_dict.items():
+                if len(self.peers) < self.max_peers:
+                    self.peers.append({pid: {
+                        'host': entry['host'],
+                        'port': entry['port']
+                    }})
 
 
 # noinspection PyBroadException

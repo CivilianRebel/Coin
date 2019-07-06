@@ -83,7 +83,6 @@ class FileStore:
         if self.debug:
             print('Removed files, trying to remove directory')
         self.size = 0
-        self.size_update = 0
         os.rmdir(self.location)
         if self.debug:
             print(f'Deleted directory\n# of files in self.location: {len(self)}')
@@ -138,6 +137,14 @@ class Blockchain:
         return self.chain[-1]
 
     def add_transaction(self, transaction: Transaction):
+        """
+        Adds a signed transaction to transactions waiting to be added to block
+        :param transaction: Transaction-like object
+        :return: Boolean of whether or not it was added successfully
+        """
+        if transaction.verified:
+            self.transactions.append(str(transaction))
+        # TODO: add network call in here to tell the peers we've got a new signed transaction
 
     def add_block_to_chain(self, block: Block):
         # verify signature

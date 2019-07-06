@@ -34,13 +34,26 @@ class Transaction:
 
     def generate_tx_string(self):
         # lazy json making lmao
-        if 'signature' not in self.__dict__.keys():
+        if self.signature is None:
             print(f'[WARNING]\t\tGenerating transaction string before it has been signed')
         ret_dict = {'sender_public': self.sender_public,
                     'recipient_public': self.recipient_public,
                     'amount': self.amount,
-                    'time': self.timestamp}
+                    'time': self.timestamp,
+                    'signature': self.signature}
         return json.dumps(ret_dict, sort_keys=True)
+
+    @property
+    def verified(self):
+        if self.signature is None:
+            return False
+        pubkey = RSA.importKey(binascii.unhexlify(self.sender_public))
+        verifier = pkcs15.new(pubkey)
+        _hash = SHA256.new(str(self).encode('utf8'))
+        if verifier.verify(_hash, binascii.unhexlify(self.signature)):
+            return True
+        else:
+            return False
 
     def __str__(self):
         return self.generate_tx_string()

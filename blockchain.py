@@ -137,6 +137,7 @@ class Blockchain:
         return self.chain[-1]
 
     def add_transaction(self, transaction: Transaction):
+<<<<<<< HEAD
         """
         Adds a signed transaction to transactions waiting to be added to block
         :param transaction: Transaction-like object

@@ -16,6 +16,14 @@ class Wallet:
         self.wallet = {'public_key': None,
                        'private_key': None}
 
+    @property
+    def public_key(self):
+        return self.wallet['public_key']
+
+    @@property
+    def private_key(self):
+        return self.wallet['private_key']
+
     @staticmethod
     def generate_new():
         random_gen = Crypto.Random.new().read

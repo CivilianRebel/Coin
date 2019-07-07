@@ -1,6 +1,11 @@
 import os
 import json
 
+config_location = 'settings.json'
+defaults = {'node_id': None,
+            'blockchain_location': 'blockchain/',
+            }
+
 
 class Settings:
     """
@@ -13,43 +18,59 @@ class Settings:
         this checks to see if we have it in memory, then double checks
         in the file then returns the value
 
+    this class can also be used with attributes instead of like a
+    dictionary
+
+
     """
-
-    def __init__(self, config_location='config.json'):
-        self.location = config_location
-        self.loaded = False
-        self.config = {'node_id': None,
-                       'port': 25565,
-                       'max_peers': 200,
-                       'blockchain_location': 'blockchain/'}
-
-    def load_config(self, loc=None):
-        if loc:
-            self.location = loc
-
-        if os.path.exists(self.location):
-            with open(self.location, 'r') as file:
-                self.config = json.load(file)
-                self.loaded = True
+    
+    def load_config(self, overwrite=False, *args, **kwargs):
+        d = kwargs.get('defaults', defaults)
+        if os.path.exists(config_location) and not overwrite:
+            with open(config_location, 'r') as file:
+                temp = json.load(file)
+            for key, value in temp.items():
+                if key in self.__dict__:
+                    if value is not self.__dict__.get(key):
+                        self.__dict__[key] = value
         else:
-            with open(self.location, 'w+') as file:
-                json.dump(self.config, file)
-                self.loaded = True
+            with open(config_location, 'w+') as file:
+                json.dump(d, file)
+            for key, value in d.items():
+                self.__dict__[key] = value
 
     def save(self):
-        with open(self.location, 'w+') as file:
-            json.dump(self.config, file)
+        with open(config_location, 'w+') as file:
+            json.dump(self.__dict__, file)
+
+    def __setattr__(self, key, value):
+        self.__dict__[key] = value
+        self.save()
+
+    def __getattr__(self, item):
+        if item not in self.__dict__:
+            raise AttributeError(f'Could not find attribute {item}')
+        else:
+            return self.__dict__[item]
 
     def __getitem__(self, item):
-        if not self.loaded:
-            self.load_config()
-        if item not in self.config.keys():
-            self.load_config()
-            if item not in self.config.keys():
-                raise KeyError('Could not find the key in the config')
+        if item not in self.__dict__:
+            raise KeyError('Could not find the key in the config')
         else:
-            return self.config[item]
+            return self.__dict__[item]
 
     def __setitem__(self, key, value):
-        self.config[key] = value
+        self.__dict__[key] = value
         self.save()
+
+    def __str__(self):
+        return json.dumps(self.__dict__)
+
+
+if __name__ == '__main__':
+    # test setting attributes
+    config = Settings()
+    config.load_config(defaults=defaults, overwrite=True)
+    for i in range(10):
+        config.__setattr__(i, i**2)
+    print(config)

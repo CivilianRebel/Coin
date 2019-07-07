@@ -8,6 +8,7 @@ import os
 from uuid import uuid4
 
 from utils import Settings
+from handler import Handler
 
 """
 packets
@@ -38,6 +39,7 @@ class Network:
         self.debugging = kwargs.get('debug', False)
         self.node_id = kwargs.get('node_id', self.establish_id())
         self.config = kwargs.get('config', Settings())
+        self.handler = kwargs.get('handler', Handler())
         self.nodes = []
         self.listen_thread = None
 
@@ -72,7 +74,7 @@ class Network:
         print(f'Connected to {sock.getpeername()}')
 
         host, port = sock.getpeername()
-        node_connection = Connection(host, port, sock)
+        node_connection = Connection(host, port, sock, handler=self.handler)
         packet = node_connection.get_packet()
         packet.handle()
 
@@ -106,9 +108,10 @@ class Network:
 
 class Connection:
 
-    def __init__(self, node_host, node_port, sock=None):
+    def __init__(self, node_host, node_port, sock=None, handler=Handler()):
         self.node_host = node_host
         self.node_port = node_port
+        self.handler = handler
         if sock:
             self.sock = sock
         else:
@@ -150,7 +153,7 @@ class Connection:
         except:
             traceback.print_exc()
 
-        return Packet(type=msg_type, payload=msg)
+        return Packet(type=msg_type, payload=msg, handler=self)
 
 
 class Packet(object):
@@ -169,25 +172,29 @@ class Packet(object):
 
     def __bytes__(self):
         length = len(self.payload)
-        msg = struct.pack(f'!16sL{length}s', bytes(self.packet_type, 'utf8'), length, bytes(self.payload, 'utf8'))
+        msg = struct.pack(f'!16sL{length}s',
+                          bytes(self.packet_type, 'utf8'),
+                          length,
+                          bytes(self.payload, 'utf8'))
         return msg
 
     def __str__(self):
         return str(self.__bytes__())
 
     def handle(self):
-        if hasattr(self, f'handle_{self.packet_type}'):
-            getattr(self.handler, f'handle_{self.packet_type}')()
+        if hasattr(self.handler, f'handle_{self.packet_type}'):
+            getattr(self.handler, f'handle_{self.packet_type}')(self.payload)
         else:
             raise AttributeError(f'Could not find handler for {self.packet_type}.')
 
     def handle_test(self):
-        print(f'Testing if this actually works\npacket_type: {self.packet_type}\npayload: {self.payload}')
+        print(f'Testing if this actually works\n'
+              f'packet_type: {self.packet_type}\n'
+              f'payload: {self.payload}')
 
 
 class Node:
-    raise NotImplementedError
-
+    pass
 
 # noinspection PyBroadException
 class Peer:
@@ -374,12 +381,12 @@ class PeerConnection:
 if __name__ == '__main__':
     # testing packet
     # this one should work fine
-    p = Packet(type='test', payload='test to see if this works')
+    p = Packet(type='test', payload='test to see if this works', handler=Handler())
     p.handle()
     print(p)
     # this should fail
     try:
-        p1 = Packet(type='bullshit_packet', payload='blah')
+        p1 = Packet(type='bullshit_packet', payload='blah', handler=Handler())
         p1.handle()
     except:
         print('Failed successfully')

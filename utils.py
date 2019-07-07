@@ -58,7 +58,9 @@ class Settings:
 
     def __getitem__(self, item):
         if item not in self.__dict__:
-            raise KeyError('Could not find the key in the config')
+            return None
+            # same reason as __getattr__
+            # raise KeyError('Could not find the key in the config')
         else:
             return self.__dict__[item]
 

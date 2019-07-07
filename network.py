@@ -29,10 +29,6 @@ def _debug(*args):
     print(f'[{threading.currentThread().getName()}]\t', args)
 
 
-class Packet:
-    pass
-
-
 class Network:
 
     def __init__(self, host='127.0.0.1', port=25565, max_peers=200, *args, **kwargs):
@@ -57,13 +53,13 @@ class Network:
         self.listen_thread.start()
         print('Started listener thread')
 
-    def broadcast(self, packet: Packet):
+    def broadcast(self, packet):
         """
         Iterate through all nodes, for every node, connect and send packet
         :param packet: The packet to send
         :return: number of nodes we got a reply from
         """
-        pass
+        assert isinstance(packet, Packet), 'Packet must be a Packet() object'
 
     def handle_node(self, sock):
         """
@@ -96,9 +92,9 @@ class Network:
         Creates or gets node id from config
         :return: None
         """
-        if self.config['node_id'] is None:
-            self.node_id['node_id'] = str(uuid4()).replace('-', '')
-        return self.config['node_id']
+        if self.config.node_id is None:
+            self.config.node_id = str(uuid4()).replace('-', '')
+        return self.config.node_id
 
 
 class Connection:
@@ -112,7 +108,20 @@ class Connection:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.connect((self.node_host, self.node_port))
 
+    def send_packet(self, packet):
+        """
+        Sends a packet to the connected node
+        :param packet: Packet instance
+        :return: None
+        """
+        assert isinstance(packet, Packet), 'Argument needs to be a Packet instance'
+        self.sock.send(bytes(packet))
+
     def get_packet(self):
+        """
+        Reads a packet from the socket
+        :return: Packet(packet_type, packet_payload)
+        """
         msg_type = ''
         msg = ''
         try:
@@ -135,6 +144,34 @@ class Connection:
             traceback.print_exc()
 
         return Packet(type=msg_type, payload=msg)
+
+
+class Packet(object):
+    def __init__(self, **kwargs):
+        self.packet_type = kwargs.get('type', None)
+        self.payload = kwargs.get('payload', None)
+
+        if self.packet_type is None and self.payload is None:
+            raise TypeError('This class cannot be initialized with None values')
+        if not hasattr(self, f'handle_{self.packet_type}'):
+            raise AttributeError(f'Handler "handle_{self.packet_type}" in packet class did not exist')
+
+    def __bytes__(self):
+        length = len(self.payload)
+        msg = struct.pack(f'!16sL{length}s', bytes(self.packet_type, 'utf8'), length, bytes(self.payload, 'utf8'))
+        return msg
+
+    def __str__(self):
+        return str(self.__bytes__())
+
+    def handle(self):
+        if hasattr(self, f'handle_{self.packet_type}'):
+            getattr(self, f'handle_{self.packet_type}')()
+        else:
+            raise AttributeError(f'Could not find handler for {self.packet_type}.')
+
+    def handle_test(self):
+        print(f'Testing if this actually works\npacket_type: {self.packet_type}\npayload: {self.payload}')
 
 
 class Node:
@@ -321,3 +358,17 @@ class PeerConnection:
                 return [None, None]
 
         return [msg_type, msg]
+
+
+if __name__ == '__main__':
+    # testing packet
+    # this one should work fine
+    p = Packet(type='test', payload='test to see if this works')
+    p.handle()
+    print(p)
+    # this should fail
+    try:
+        p1 = Packet(type='bullshit_packet', payload='blah')
+        p1.handle()
+    except:
+        print('Failed successfully')

@@ -68,6 +68,13 @@ class Network:
         :param sock: Socket passed from parent server
         :return: None
         """
+        print(f'Created child {threading.currentThread().getName()}')
+        print(f'Connected to {sock.getpeername()}')
+
+        host, port = sock.getpeername()
+        node_connection = Connection(host, port, sock)
+        packet = node_connection.get_packet()
+        packet.handle()
 
     def listen(self):
         """
@@ -149,8 +156,9 @@ class Connection:
 class Packet(object):
     def __init__(self, **kwargs):
         self.packet_type = kwargs.get('type', None)
+        if self.packet_type:
+            self.packet_type = str(self.packet_type).lower()
         self.payload = kwargs.get('payload', None)
-
         if self.packet_type is None and self.payload is None:
             raise TypeError('This class cannot be initialized with None values')
         if not hasattr(self, f'handle_{self.packet_type}'):

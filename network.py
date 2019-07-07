@@ -4,6 +4,7 @@ import traceback
 import struct
 import socket
 import time
+import os
 
 """
 packets
@@ -23,6 +24,34 @@ and I like sleep sometimes
 
 def _debug(*args):
     print(f'[{threading.currentThread().getName()}]\t', args)
+
+
+class Network:
+
+    def __init__(self, host='127.0.0.1', port=25565, max_peers=200, *args, **kwargs):
+        self.host = host
+        self.port = port
+        self.max_peers = max_peers
+        self.debugging = kwargs.get('debug', False)
+        if 'node_id' not in kwargs:
+            self.node_id = self.establish_id()
+        else:
+            self.node_id = kwargs.get('node_id')
+
+        self.nodes = []
+
+
+    def establish_id(self):
+        if os.path.exists()
+
+
+
+class Connection:
+    pass
+
+
+class Peer:
+    pass
 
 
 # noinspection PyBroadException

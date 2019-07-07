@@ -36,10 +36,7 @@ class Network:
         self.port = port
         self.max_peers = max_peers
         self.debugging = kwargs.get('debug', False)
-        if 'node_id' not in kwargs:
-            self.node_id = self.establish_id()
-        else:
-            self.node_id = kwargs.get('node_id')
+        self.node_id = kwargs.get('node_id', self.establish_id())
         self.config = kwargs.get('config', Settings())
         self.nodes = []
         self.listen_thread = None
@@ -158,14 +155,17 @@ class Connection:
 
 class Packet(object):
     def __init__(self, **kwargs):
+        self.handler = kwargs.get('handler', None)
         self.packet_type = kwargs.get('type', None)
-        if self.packet_type:
-            self.packet_type = str(self.packet_type).lower()
         self.payload = kwargs.get('payload', None)
-        if self.packet_type is None and self.payload is None:
-            raise TypeError('This class cannot be initialized with None values')
-        if not hasattr(self, f'handle_{self.packet_type}'):
-            raise AttributeError(f'Handler "handle_{self.packet_type}" in packet class did not exist')
+
+        assert self.handler is not None, 'Handler must not be None'
+        assert self.packet_type is not None, 'Packet type must not be None'
+        assert self.payload is not None, 'Payload must not be None'
+
+        self.packet_type = str(self.packet_type).lower()
+
+        assert hasattr(self.handler, f'handle_{self.packet_type}'), 'No handler found for this packet'
 
     def __bytes__(self):
         length = len(self.payload)
@@ -177,7 +177,7 @@ class Packet(object):
 
     def handle(self):
         if hasattr(self, f'handle_{self.packet_type}'):
-            getattr(self, f'handle_{self.packet_type}')()
+            getattr(self.handler, f'handle_{self.packet_type}')()
         else:
             raise AttributeError(f'Could not find handler for {self.packet_type}.')
 
@@ -186,7 +186,6 @@ class Packet(object):
 
 
 class Node:
-
     raise NotImplementedError
 
 

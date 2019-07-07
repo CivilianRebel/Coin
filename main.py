@@ -10,7 +10,7 @@ from queue import Queue
 
 
 from blockchain import Blockchain
-from network import Peer
+from network import Peer, Network
 from transaction import Transaction
 from wallet import Wallet
 
@@ -23,8 +23,7 @@ class Main:
         self.wallet = None
         self.peer_messenger = Queue()
         self.network_thread = None
-        self.id = str(uuid4()).replace('-', '')
-        self.network = Peer(self.id, '127.0.0.1', 25565)
+        self.network = Network(debug=True)
         self.handlers = {'load': self.load_wallet,
                          'create': self.create_wallet,
                          'send': self.send
@@ -57,6 +56,7 @@ class Main:
         print(f'Wallet created')
 
     def run(self):
+        self.network.create_listen_thread()
         while self.running:
             # display options
             # gather input

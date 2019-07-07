@@ -170,12 +170,12 @@ class PeerConnection:
         msg_type = ''
         msg = ''
         try:
-            msg_type = self.sock.read(4)
-            data = self.sock.read(4)
+            msg_type = self.sock.recv(4)
+            data = self.sock.recv(4)
             msg_len = int(struct.unpack('!L', data)[0])
 
             while len(msg) != msg_len:
-                data = self.sock.read(min(2048, msg_len - len(msg)))
+                data = self.sock.recv(min(2048, msg_len - len(msg)))
                 if not len(data):
                     break
                 msg += data

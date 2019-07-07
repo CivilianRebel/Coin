@@ -37,6 +37,7 @@ class Peer:
         self.app_version = '01'
         self.running = True
         self.lock = threading.Lock()
+        self.message_queue = None
         self.peers = []
         self.handlers = {version: self.handle_version,
                          verrack: self.handle_verrack,
@@ -46,6 +47,19 @@ class Peer:
     def debug(self, *args):
         if self.debugging:
             _debug(args)
+
+    def set_message_queue(self, q):
+        self.message_queue = q
+
+    def broadcast(self, msg_type, msg, t=5):
+        """
+        connect to each peer in list with timeout t
+        :param msg_type: Type of message to send
+        :param msg: Message body to send to peers
+        :param t: Time to wait before moving on to the next peer
+        :return: None
+        """
+        return None
 
     def create_server_socket(self, port=None, q=5):
         sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)

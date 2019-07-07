@@ -41,6 +41,8 @@ class Settings:
             json.dump(self.config, file)
 
     def __getitem__(self, item):
+        if not self.loaded:
+            self.load_config()
         if item not in self.config.keys():
             self.load_config()
             if item not in self.config.keys():

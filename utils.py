@@ -49,7 +49,10 @@ class Settings:
 
     def __getattr__(self, item):
         if item not in self.__dict__:
-            raise AttributeError(f'Could not find attribute {item}')
+            return None
+            # figured for the sake of my program, lets just return None,
+            # to avoid all those try except shits
+            # raise AttributeError(f'Could not find attribute {item}')
         else:
             return self.__dict__[item]
 

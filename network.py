@@ -5,6 +5,9 @@ import struct
 import socket
 import time
 import os
+from uuid import uuid4
+
+from utils import Settings
 
 """
 packets
@@ -26,6 +29,10 @@ def _debug(*args):
     print(f'[{threading.currentThread().getName()}]\t', args)
 
 
+class Packet:
+    pass
+
+
 class Network:
 
     def __init__(self, host='127.0.0.1', port=25565, max_peers=200, *args, **kwargs):
@@ -37,20 +44,67 @@ class Network:
             self.node_id = self.establish_id()
         else:
             self.node_id = kwargs.get('node_id')
-
+        self.config = kwargs.get('config', Settings())
         self.nodes = []
 
+    def create_listen_thread(self):
+        """
+        Spawns the listener thread
+        :return: None
+        """
+        pass
+
+    def broadcast(self, packet: Packet):
+        """
+        Iterate through all nodes, for every node, connect and send packet
+        :param packet: The packet to send
+        :return: number of nodes we got a reply from
+        """
+        pass
+
+    def handle_node(self, sock):
+        """
+        This method is called in a new thread when a node connects to us
+        it handles communication between nodes
+        :param sock: Socket passed from parent server
+        :return: None
+        """
+
+    def listen(self):
+        """
+        This method is called by a new thread to listen for connections on the
+        host and port
+
+        for each new connection it creates a new thread to handle the communication
+
+        :return: None
+        """
+        pass
 
     def establish_id(self):
-        if os.path.exists()
-
+        """
+        Creates or gets node id from config
+        :return: None
+        """
+        if self.config['node_id'] is None:
+            self.node_id['node_id'] = str(uuid4()).replace('-', '')
+        return self.config['node_id']
 
 
 class Connection:
-    pass
+
+    def __init__(self, node_host, node_port, sock=None):
+        self.node_host = node_host
+        self.node_port = node_port
+        if sock:
+            self.sock = sock
+        else:
+            self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            self.sock.connect((self.node_host, self.node_port))
 
 
-class Peer:
+
+class Node:
     pass
 
 

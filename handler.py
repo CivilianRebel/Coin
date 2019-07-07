@@ -1,5 +1,5 @@
 class Handler:
 
-    # TODO: move handlers out of Peer class into here
-    def __init__(self):
-        print('Not implemented')
+    def handle_test(self, packet_data):
+        print(f'omg handling test\n {packet_data}')
+        return self

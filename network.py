@@ -46,13 +46,16 @@ class Network:
             self.node_id = kwargs.get('node_id')
         self.config = kwargs.get('config', Settings())
         self.nodes = []
+        self.listen_thread = None
 
     def create_listen_thread(self):
         """
         Spawns the listener thread
         :return: None
         """
-        pass
+        self.listen_thread = threading.Thread(target=self.listen, daemon=True)
+        self.listen_thread.start()
+        print('Started listener thread')
 
     def broadcast(self, packet: Packet):
         """
@@ -79,7 +82,14 @@ class Network:
 
         :return: None
         """
-        pass
+        # first create the server socket
+        server = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        server.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
+        server.bind((self.host, self.port))
+        while True:
+            client_socket, client_addr = server.accept()
+            handler_thread = threading.Thread(target=self.handle_node, args=[client_socket])
+            handler_thread.start()
 
     def establish_id(self):
         """
@@ -102,6 +112,29 @@ class Connection:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.connect((self.node_host, self.node_port))
 
+    def get_packet(self):
+        msg_type = ''
+        msg = ''
+        try:
+            msg_type = self.sock.recv(4)
+            data = self.sock.recv(4)
+            msg_len = int(struct.unpack('!L', data)[0])
+
+            while len(msg) != msg_len:
+                data = self.sock.recv(min(2048, msg_len - len(msg)))
+                if not len(data):
+                    break
+                msg += data
+
+            if len(msg) != msg_len:
+                return [None, None]
+
+        except KeyboardInterrupt:
+            raise
+        except:
+            traceback.print_exc()
+
+        return Packet(type=msg_type, payload=msg)
 
 
 class Node:

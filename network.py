@@ -61,6 +61,9 @@ class Network:
         """
         assert isinstance(packet, Packet), 'Packet must be a Packet() object'
 
+    def add_node(self, node):
+        self.nodes.append(node)
+
     def handle_node(self, sock):
         """
         This method is called in a new thread when a node connects to us
@@ -183,7 +186,8 @@ class Packet(object):
 
 
 class Node:
-    pass
+
+    raise NotImplementedError
 
 
 # noinspection PyBroadException

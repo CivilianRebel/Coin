@@ -39,7 +39,7 @@ class Network:
         self.debugging = kwargs.get('debug', False)
         self.node_id = kwargs.get('node_id', self.establish_id())
         self.config = kwargs.get('config', Settings())
-        self.handler = kwargs.get('handler', Handler())
+        self.handler = kwargs.get('handler', Handler(network=self))
         self.nodes = []
         self.listen_thread = None
 
@@ -76,7 +76,7 @@ class Network:
         host, port = sock.getpeername()
         node_connection = Connection(host, port, sock, handler=self.handler)
         packet = node_connection.get_packet()
-        packet.handle()
+        packet.handle(node_connection)
 
     def listen(self):
         """
@@ -108,7 +108,7 @@ class Network:
 
 class Connection:
 
-    def __init__(self, node_host, node_port, sock=None, handler=Handler()):
+    def __init__(self, node_host, node_port, sock=None, handler=None):
         self.node_host = node_host
         self.node_port = node_port
         self.handler = handler
@@ -118,14 +118,14 @@ class Connection:
             self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
             self.sock.connect((self.node_host, self.node_port))
 
-    def send_packet(self, packet):
+    def send(self, packet_type=None, **kwargs):
         """
         Sends a packet to the connected node
-        :param packet: Packet instance
+        :param packet_type: type of packet
         :return: None
         """
-        assert isinstance(packet, Packet), 'Argument needs to be a Packet instance'
-        self.sock.send(bytes(packet))
+        p = Packet(type=packet_type, payload=kwargs, handler=self.handler)
+        self.sock.send(bytes(p))
 
     def get_packet(self):
         """
@@ -153,7 +153,7 @@ class Connection:
         except:
             traceback.print_exc()
 
-        return Packet(type=msg_type, payload=msg, handler=self)
+        return Packet(type=msg_type, payload=json.loads(msg), handler=self.handler, connection=self)
 
 
 class Packet(object):
@@ -167,6 +167,7 @@ class Packet(object):
         assert self.payload is not None, 'Payload must not be None'
 
         self.packet_type = str(self.packet_type).lower()
+        self.payload = json.dumps(self.payload)
 
         assert hasattr(self.handler, f'handle_{self.packet_type}'), 'No handler found for this packet'
 
@@ -179,11 +180,12 @@ class Packet(object):
         return msg
 
     def __str__(self):
-        return str(self.__bytes__())
+        return self.payload
 
-    def handle(self):
+    def handle(self, connection):
         if hasattr(self.handler, f'handle_{self.packet_type}'):
-            getattr(self.handler, f'handle_{self.packet_type}')(self.payload)
+            getattr(self.handler, f'handle_{self.packet_type}')(connection,
+                                                                packet_data=json.loads(self.payload.encode('utf8')))
         else:
             raise AttributeError(f'Could not find handler for {self.packet_type}.')
 
